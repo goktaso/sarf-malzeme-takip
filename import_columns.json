@@ -1,0 +1,8 @@
+{
+  "Ürün Grupları": {"name":"Grup adı","prefix":"Kod öneki","module":"Modül"},
+  "Departmanlar": {"name":"Departman adı"},
+  "Personel": {"code":"Sicil numarası","name":"Ad soyad","department":"Departman adı","active":"Çalışma durumu"},
+  "Ürün Kartları": {"key":"Kart referansı","prefix":"Grup öneki","name":"Ürün adı","unit":"Stok birimi","scope":"Teslim kapsamı","sizes":"Bedenler / numaralar","color":"Renk","minimum":"Kritik stok"},
+  "Varyantlar": {"product":"Ürün kodu / @kart referansı","color":"Renk","size":"Beden / numara","minimum":"Kritik stok"},
+  "Stok Hareketleri": {"key":"Fiş referansı","kind":"İşlem türü","day":"İşlem tarihi","purchase_day":"Alış tarihi","supplier":"Tedarikçi","reference":"Belge numarası","department":"Departman adı","person":"Personel sicili","source":"Kaynak teslim fişi","note":"Açıklama","product":"Ürün kodu / @kart referansı","color":"Renk","size":"Beden / numara","qty":"Miktar / sayılan miktar","unit_price":"Birim maliyet TL"}
+}

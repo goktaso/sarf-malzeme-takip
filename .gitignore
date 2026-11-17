@@ -1,0 +1,6 @@
+__pycache__/
+data/
+outputs/*
+!outputs/excel-import/
+outputs/excel-import/*
+!outputs/excel-import/toplu-aktarim-sablonlari.xlsx
