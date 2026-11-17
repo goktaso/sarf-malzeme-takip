@@ -52,7 +52,11 @@ h2 { font-size: 1rem; }
 .stat strong { font-weight: 730; font-size: 1.12rem; font-variant-numeric: tabular-nums; }
 .report-stats .stat strong { display: block; white-space: pre-line; overflow-wrap: anywhere; }
 .count-import { padding: 0 16px 15px; }
-.count-quantity-editor { display: grid; grid-template-columns: minmax(82px, 1fr) auto; gap: 6px; }
+.count-quantity-editor { display: grid; grid-template-columns: minmax(145px, 1fr) auto; gap: 6px; }
+.count-stepper { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px; }
+.count-stepper input { appearance: textfield; }
+.count-stepper input::-webkit-inner-spin-button,
+.count-stepper input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .count-header .panel-head p { margin-top: 5px; color: var(--muted); }
 .table-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); font-weight: 650; }
 .period-note { color: var(--muted); }

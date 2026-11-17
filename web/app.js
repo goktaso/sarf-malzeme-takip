@@ -149,6 +149,22 @@ function hasCountQuantityDrafts(id = countId()) {
   return Boolean(id && [...countQuantityDrafts.keys()].some(key => key.startsWith(id + "/")));
 }
 
+function countQuantityStepper(value, caption, attributes = "") {
+  return `<div class="count-stepper">
+    <button type="button" data-count-step="-1" aria-label="Miktarı 1 azalt">−</button>
+    ${input("counted_qty", value, `type="number" min="0" step=".001" data-count-step-field
+      aria-label="${esc(caption)}" placeholder="Sayılmadı" ${attributes}`)}
+    <button type="button" data-count-step="1" aria-label="Miktarı 1 artır">+</button>
+  </div>`;
+}
+
+function stepCountQuantity(field, step) {
+  if (step < 0 && !field.valueAsNumber) return;
+  const thousandths = Number.isFinite(field.valueAsNumber) ? Math.round(field.valueAsNumber * 1000) : 0;
+  field.value = Math.max(0, thousandths + step * 1000) / 1000;
+  field.dispatchEvent(new Event("input", {bubbles: true}));
+}
+
 function countQuantityCell(count, line, editable) {
   const amount = line.counted_qty === null ? null : quantityCell(line.counted_qty, line.unit);
   if (!editable) return amount ?? "—";
@@ -157,8 +173,7 @@ function countQuantityCell(count, line, editable) {
   const details = [line.name, variantName(line)].filter(Boolean).join(" · ");
   const markup = `<span data-saved-quantity hidden>${amount?.text ?? "—"}</span>
     <div class="count-quantity-editor" data-cell-controls>
-      ${input("counted_qty", value, `type="number" min="0" step=".001" data-count-quantity="${line.variant_id}"
-        aria-label="${esc(details)} sayılan miktar" placeholder="Sayılmadı"`)}
+      ${countQuantityStepper(value, details + " sayılan miktar", `data-count-quantity="${line.variant_id}"`)}
       <button type="button" data-count-save="${line.variant_id}" aria-label="${esc(details)} miktarını kaydet">Kaydet</button>
     </div>`;
   return amount ? {...amount, text: markup} : markup;
@@ -1003,8 +1018,9 @@ function countForm(type, selection) {
   const fixed = identity + input("operation", operation, 'type="hidden"') + input("variant_id", row.variant_id, 'type="hidden"');
   if (operation === "delete") return fixed + `<p class="wide"><strong>${caption}</strong> sayım listesinden çıkarılacak.</p>`;
   return fixed + `<p class="wide"><strong>${caption}</strong><span class="sub">Sistem bakiyesi ${qty(row.expected_qty)} ${esc(row.unit)}</span></p>` +
-    label("Sayılan miktar", input("counted_qty", countQuantityDrafts.get(countQuantityKey(count, row.variant_id)) ?? countQuantityValue(row),
-      'type="number" min="0" step=".001" placeholder="Sayılmadı"')) +
+    `<div><label for="count-modal-quantity">Sayılan miktar</label>${countQuantityStepper(
+      countQuantityDrafts.get(countQuantityKey(count, row.variant_id)) ?? countQuantityValue(row),
+      "Sayılan miktar", 'id="count-modal-quantity"')}</div>` +
     (can("field.cost") ? label("Birim maliyet TL", input("unit_price", row.unit_price === null ? "" : row.unit_price / 10000,
       'type="number" min="0" step=".0001" placeholder="Stok maliyetinden al"')) : "");
 }
@@ -1248,6 +1264,10 @@ document.addEventListener("click", event => {
   }
   const button = event.target.closest("button");
   if (!button) return;
+  if (button.dataset.countStep) {
+    stepCountQuantity(button.closest(".count-stepper").querySelector("input"), Number(button.dataset.countStep));
+    return;
+  }
   if (button.dataset.countSave) saveCountQuantity(button.closest(".count-quantity-editor"));
   if (button.dataset.countItem) openForm("count-line", button.dataset.countItem === "add" ? "add" : "save/" + button.dataset.countItem);
   if (button.dataset.countDelete) openForm("count-line", "delete/" + button.dataset.countDelete);
@@ -1313,7 +1333,12 @@ content.addEventListener("input", event => {
   next?.focus();
   if (cursor !== null) next.setSelectionRange(cursor, cursor);
 });
-content.addEventListener("keydown", event => {
+document.addEventListener("keydown", event => {
+  if (event.target.matches("[data-count-step-field]") && ["ArrowUp", "ArrowDown"].includes(event.key)) {
+    event.preventDefault();
+    stepCountQuantity(event.target, event.key === "ArrowUp" ? 1 : -1);
+    return;
+  }
   if (event.key !== "Enter" || !event.target.dataset.countQuantity) return;
   event.preventDefault();
   saveCountQuantity(event.target.closest(".count-quantity-editor"));
