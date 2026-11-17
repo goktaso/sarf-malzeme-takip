@@ -37,55 +37,6 @@ VARIANT_COLUMNS = """
     UNIQUE(product_id, size, color)
 """
 
-SCHEMA = f"""
-CREATE TABLE IF NOT EXISTS departments (
-    id INTEGER PRIMARY KEY, name TEXT NOT NULL UNIQUE,
-    active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1))
-);
-CREATE TABLE IF NOT EXISTS people (
-    id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
-    department_id INTEGER NOT NULL REFERENCES departments(id),
-    active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1))
-);
-CREATE TABLE IF NOT EXISTS product_groups (
-    id INTEGER PRIMARY KEY, name TEXT NOT NULL, prefix TEXT NOT NULL UNIQUE,
-    module TEXT NOT NULL CHECK(module IN ('sarf','kkd')),
-    next_number INTEGER NOT NULL DEFAULT 1,
-    size_kind TEXT NOT NULL DEFAULT 'size' CHECK(size_kind IN ('size','shoe'))
-);
-CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, name TEXT NOT NULL,
-    module TEXT NOT NULL CHECK(module IN ('sarf','kkd')), category TEXT NOT NULL,
-    unit TEXT NOT NULL, scope TEXT NOT NULL CHECK(scope IN ('person','department','both')),
-    group_id INTEGER REFERENCES product_groups(id),
-    active INTEGER NOT NULL DEFAULT 1 CHECK(active IN (0,1))
-);
-CREATE TABLE IF NOT EXISTS variants (
-    {VARIANT_COLUMNS}
-);
-CREATE TABLE IF NOT EXISTS documents (
-    id INTEGER PRIMARY KEY, request_id TEXT NOT NULL UNIQUE, kind TEXT NOT NULL,
-    day TEXT NOT NULL, purchase_day TEXT, supplier TEXT, reference TEXT, note TEXT,
-    department_id INTEGER REFERENCES departments(id), person_id INTEGER REFERENCES people(id),
-    source_id INTEGER REFERENCES documents(id)
-);
-CREATE TABLE IF NOT EXISTS movements (
-    id INTEGER PRIMARY KEY, document_id INTEGER NOT NULL REFERENCES documents(id),
-    variant_id INTEGER NOT NULL REFERENCES variants(id),
-    qty INTEGER NOT NULL, value INTEGER NOT NULL, unit_price INTEGER,
-    UNIQUE(document_id, variant_id)
-);
-CREATE INDEX IF NOT EXISTS movement_variant ON movements(variant_id);
-CREATE TABLE IF NOT EXISTS definition_versions (
-    id INTEGER PRIMARY KEY,
-    entity TEXT NOT NULL CHECK(entity IN ('products','departments','people','product_groups')),
-    entity_id INTEGER NOT NULL,
-    effective_day TEXT NOT NULL,
-    recorded_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
-    state TEXT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS definition_as_of ON definition_versions(entity,entity_id,effective_day DESC,id DESC);
-"""
 VERSIONED_TABLES = ("products", "departments", "people", "product_groups")
 BASELINE = "0001-01-01"
 ISTANBUL = timezone(timedelta(hours=3))
@@ -126,7 +77,7 @@ def initialize():
     DB.parent.mkdir(parents=True, exist_ok=True)
     with connect() as db:
         db.execute("PRAGMA journal_mode = WAL")
-        db.executescript(SCHEMA + stock_counts.SQLITE_SCHEMA)
+        db.executescript((ROOT / "sqlite_schema.sql").read_text(encoding="utf-8"))
         db.execute("PRAGMA foreign_keys = OFF")
         db.execute("BEGIN IMMEDIATE")
         if "size_kind" not in {row["name"] for row in db.execute("PRAGMA table_info(product_groups)")}:

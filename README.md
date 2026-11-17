@@ -15,6 +15,7 @@ Tarayıcıda [http://localhost:8765](http://localhost:8765) adresini açıp **Wi
 
 ## SQL Server ve erişim
 
+- Sürüm kontrollü şema dosyaları ana uygulama için `sqlserver_schema.sql`, SQLite demo için `sqlite_schema.sql`. Dosyalar tablo, kısıt ve indeks tanımlarını içerir. Yerel veritabanı dosyaları `data/` altında tutulur.
 - Bu bilgisayarda ana veritabanı `SarfMalzemeTakip`. Dosyalar proje klasöründeki `data/sqlserver` dizininde. Yerel bağlantı varsayılan SQL Server örneğine Windows kimliğiyle kurulur. Sunucu, veritabanı ve ODBC sürücüsü gerektiğinde `SARF_SQL_SERVER`, `SARF_SQL_DATABASE` ve `SARF_SQL_DRIVER` ortam değişkenleriyle ayarlanır.
 - Yeni bir kurulumda veritabanını oluşturduktan sonra `python configure_sqlserver.py --admin (whoami) --name "Ad Soyad"` komutunu çalıştırın. Eski ana SQLite kayıtları taşınacaksa `--migrate-legacy` ekleyin. Hedef tablolar doluysa taşıma durur.
 - **Kullanıcılar ve yetkiler** ekranı, Windows hesabına ekran, işlem, tedarikçi, maliyet, fiş açıklaması ve çıktı yetkisi atar. Departman kapsamı olan hesabın hareket ve personel kayıtları o departmana göre sınırlandırılır. Ortak stok görüntüleme ayrı ekran yetkisidir. Alış ve sayım için şirket geneli işlem ve ilgili alan yetkileri gerekir. Toplu Excel aktarımı yönetici yetkisi gerektirir.

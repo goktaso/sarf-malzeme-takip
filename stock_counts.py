@@ -7,25 +7,6 @@ from io import BytesIO
 import access
 import excel_import
 
-SQLITE_SCHEMA = """
-CREATE TABLE IF NOT EXISTS stock_counts (
-    id INTEGER PRIMARY KEY, day TEXT NOT NULL, note TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'draft' CHECK(status IN ('draft','locked','rejected','approved')),
-    revision INTEGER NOT NULL DEFAULT 0, owner TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS stock_count_lines (
-    count_id INTEGER NOT NULL REFERENCES stock_counts(id), variant_id INTEGER NOT NULL REFERENCES variants(id),
-    code TEXT NOT NULL, name TEXT NOT NULL, category TEXT NOT NULL, color TEXT NOT NULL,
-    size TEXT NOT NULL, size_kind TEXT NOT NULL, unit TEXT NOT NULL,
-    expected_qty INTEGER NOT NULL, counted_qty INTEGER, unit_price INTEGER,
-    PRIMARY KEY(count_id, variant_id)
-);
-CREATE TABLE IF NOT EXISTS stock_count_documents (
-    count_id INTEGER NOT NULL REFERENCES stock_counts(id), document_id INTEGER NOT NULL REFERENCES documents(id),
-    PRIMARY KEY(count_id, document_id)
-);
-"""
-
 SHEET = "Sayım"
 HEADERS = ("Ürün kodu", "Ürün", "Renk", "Beden / numara", "Birim",
            "Sistem bakiyesi", "Sayılan miktar", "Birim maliyet TL")
